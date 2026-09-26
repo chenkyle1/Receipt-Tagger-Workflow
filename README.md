@@ -2,7 +2,7 @@
 
 An automated n8n workflow designed to parse incoming receipt images, extract structured line-item data using AI, and append transaction details directly to Google Sheets.
 
-![Workflow Screenshot]([screenshots/workflow-canvas.png](https://github.com/chenkyle1/Receipt-Tagger-Workflow/commit/6beaf1178e577a733b5d0cc7f424bfb7ca69cb91))
+![Workflow Screenshot](https://github.com/chenkyle1/Receipt-Tagger-Workflow/blob/main/Screenshot%20From%202026-09-26%2016-25-27.png#:~:text=Screenshot%20From%202026%2D09%2D26%2016%2D25%2D27%2Epng,-Workflow)
 
 ## 📌 Overview
 This workflow automates receipt processing to eliminate manual data entry. It listens for uploaded documents, processes the image using an LLM vision prompt, sanitizes the extracted monetary values, and logs the parsed record into a master spreadsheet while returning a shareable link.

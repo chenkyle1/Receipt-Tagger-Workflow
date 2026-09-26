@@ -1,0 +1,436 @@
+{
+  "name": "Receipt Tagger",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "messageCreate",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-discord-dnd.discordTriggerDnd",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -240
+      ],
+      "id": "abfdecc0-f971-4026-97b8-38687db01b86",
+      "name": "Discord Trigger DND",
+      "credentials": {
+        "discordApiDnd": {
+          "id": "YOUR_DISCORD_CREDENTIAL_ID",
+          "name": "Discord DND account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.message.attachments[0].attachment }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        -240
+      ],
+      "id": "439892a7-a706-422c-aa31-3ffb0406984c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "name": "=File {{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "88a7d902-d644-41fe-b404-a1e38c5cf820",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "02217500-3abe-4394-8af5-59348af561ae",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload file').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "7ad89d7e-6c07-499b-a936-5a8cbd765697",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Merchant": "={{ $json.merchant.name }}",
+            "Address": "={{ $json.merchant.address }}",
+            "Receipt Link": "={{ $('Upload file').item.json.webContentLink }}",
+            "Category": "Business",
+            "Subtotal": "=${{$json.financials.subtotal }}",
+            "Tax": "=${{$json.financials.tax }}",
+            "Grandtotal": "=${{$json.financials.grand_total }}",
+            "Tip": "=${{$json.financials.tip }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Merchant",
+              "displayName": "Merchant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subtotal",
+              "displayName": "Subtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tax",
+              "displayName": "Tax",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tip",
+              "displayName": "Tip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Grandtotal",
+              "displayName": "Grandtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Receipt Link",
+              "displayName": "Receipt Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        288
+      ],
+      "id": "51eff50f-1a9b-40b5-9321-71bd24c6c4f8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retrieve the binary item reference from the preceding node\nconst item = $input.item;\nconst binaryData = item.binary?.data;\n\nif (!binaryData) {\n  throw new Error(\"No binary data found in input! Check that the Google Drive Download node runs immediately before this step.\");\n}\n\n// 1. Fetch the actual raw file buffer from n8n binary storage (resolves 'filesystemv2')\nconst buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\n\n// 2. Convert raw buffer to a real Base64 string\nconst cleanBase64 = buffer.toString('base64');\n\n// 3. Form the valid Data URL\nconst mimeType = binaryData.mimeType || 'image/jpeg';\nconst dataUrl = `data:${mimeType};base64,${cleanBase64}`;\n\nconst promptText = `You are an expert OCR and document processing assistant specializing in structured data extraction.\\n\\nAnalyze the provided receipt image and extract the key information into a single, valid JSON object. Do not include any explanations, Markdown block wrappers, or conversational text—output ONLY raw JSON.\\n\\nSchema:\\n{\\n  \"merchant\": { \"name\": null, \"address\": null, \"phone_number\": null },\\n  \"transaction\": { \"date\": null, \"time\": null, \"receipt_number\": null, \"payment_method\": null, \"card_last_four\": null },\\n  \"line_items\": [{ \"description\": \"\", \"quantity\": 1, \"unit_price\": null, \"total_price\": 0 }],\\n  \"financials\": { \"subtotal\": null, \"tax\": null, \"tip\": null, \"discount\": null, \"grand_total\": 0 },\\n  \"metadata\": { \"currency\": null, \"confidence_score\": \"High\" }\\n}`;\n\nreturn {\n  json: {\n    payload: {\n      model: \"deepseek-v4-flash-vision-exp\",\n      messages: [\n        {\n          role: \"user\",\n          content: [\n            { type: \"text\", text: promptText },\n            {\n              type: \"image_url\",\n              image_url: { url: dataUrl }\n            }\n          ]\n        }\n      ]\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "031c7d01-d274-4046-b762-3836e1eff8d9",
+      "name": "Image Format and JSON payload"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "deepSeekApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        288
+      ],
+      "id": "9ff11791-60fe-4f1b-8e96-24ff71cf5180",
+      "name": "Post AI Image Analysis",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "YOUR_DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to format ALL CAPS text into Title Case\nfunction toTitleCase(str) {\n  return str.toLowerCase().replace(/\\b\\w/g, c => c.toUpperCase());\n}\n\n// Extract raw data from the incoming node payload\nconst rawData = $input.item.json;\n\n// Handle nested structure whether wrapped in 'payload' or directly in 'json'\nconst responseText = rawData.choices?.[0]?.message?.content || rawData;\nconst receipt = typeof responseText === 'string' ? JSON.parse(responseText) : responseText;\n\n// 1. Clean Merchant Details\nif (receipt.merchant) {\n  // Format phone number to clean XXX-XXX-XXXX\n  if (receipt.merchant.phone_number) {\n    const digits = receipt.merchant.phone_number.replace(/\\D/g, '');\n    if (digits.length === 10) {\n      receipt.merchant.phone_number = `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;\n    }\n  }\n  // Standardize state/zip formatting\n  if (receipt.merchant.address) {\n    receipt.merchant.address = receipt.merchant.address.replace(/\\bMA 1760\\b/, 'MA 01760');\n  }\n}\n\n// 2. Clean Transaction\nif (receipt.transaction?.payment_method) {\n  if (/american express/i.test(receipt.transaction.payment_method)) {\n    receipt.transaction.payment_method = 'Amex';\n  }\n}\n\n// 3. Clean Line Items (Strip SKUs, convert to Title Case, and consolidate duplicates)\nif (Array.isArray(receipt.line_items)) {\n  const cleanedMap = new Map();\n\n  for (const item of receipt.line_items) {\n    // Remove leading SKU/item numbers (e.g., \"66538 GOGGLES\" -> \"GOGGLES\")\n    let desc = item.description.replace(/^\\d+\\s+/, '').trim();\n    \n    // Convert to Title Case\n    desc = toTitleCase(desc);\n\n    const key = desc.toLowerCase();\n\n    if (cleanedMap.has(key)) {\n      // Consolidate duplicate items\n      const existing = cleanedMap.get(key);\n      existing.quantity += item.quantity || 1;\n      existing.total_price = Number((existing.total_price + item.total_price).toFixed(2));\n    } else {\n      cleanedMap.set(key, {\n        description: desc,\n        quantity: item.quantity || 1,\n        unit_price: item.unit_price,\n        total_price: item.total_price\n      });\n    }\n  }\n\n  receipt.line_items = Array.from(cleanedMap.values());\n}\n\nreturn { json: receipt };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        288
+      ],
+      "id": "a89ec266-2423-451d-92ae-49796e3e8af2",
+      "name": "Output Content Cleaning"
+    },
+    {
+      "parameters": {
+        "action": "sendMessage",
+        "serverId": "YOUR_DISCORD_SERVER_ID",
+        "channelId": "YOUR_DISCORD_CHANNEL_ID",
+        "messageContent": "Receipt Processed. Can be found here",
+        "options": {}
+      },
+      "type": "n8n-nodes-discord-dnd.discordActionDnd",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        288
+      ],
+      "id": "6c13ebeb-5e33-4eb0-9414-737101fdd2a6",
+      "name": "Discord Action DND",
+      "credentials": {
+        "discordApiDnd": {
+          "id": "YOUR_DISCORD_CREDENTIAL_ID",
+          "name": "Discord DND account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Discord Trigger DND": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Image Format and JSON payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Format and JSON payload": {
+      "main": [
+        [
+          {
+            "node": "Post AI Image Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post AI Image Analysis": {
+      "main": [
+        [
+          {
+            "node": "Output Content Cleaning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Content Cleaning": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Discord Action DND",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "63c8d694-32f3-497e-b0be-507b7ce33b93",
+  "nodeGroups": [],
+  "id": "rdxjPHcG50fFyqm4",
+  "tags": []
+}
